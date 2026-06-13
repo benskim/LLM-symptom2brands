@@ -1,5 +1,2 @@
-flask==3.0.3
 google-generativeai==0.7.2
 pydantic==2.7.4
-markdown==3.6
-weasyprint==62.3

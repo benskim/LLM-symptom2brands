@@ -33,6 +33,7 @@ class EvidenceGap(BaseModel):
 class AuditReport(BaseModel):
     brand_name: str
     brand_website: str
+    prompts_used: list[str] = Field(default_factory=list)
     created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
     visibility: Optional[VisibilityResult] = None
     competitors: dict[str, int] = Field(default_factory=dict)
@@ -40,5 +41,4 @@ class AuditReport(BaseModel):
     grounding: Optional[GroundingResult] = None
     evidence_gaps: list[EvidenceGap] = Field(default_factory=list)
     quick_wins: list[str] = Field(default_factory=list)
-    markdown_report: str = ""
-    status: str = "pending"
+    status: str = "complete"

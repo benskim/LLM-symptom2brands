@@ -2,25 +2,16 @@ from datetime import datetime
 from models import AuditReport
 
 
-def generate_markdown_report(report: AuditReport) -> str:
+def generate_markdown(report: AuditReport) -> str:
     v = report.visibility
     c = report.citations
     g = report.grounding
+    score = v.visibility_score if v else 0.0
 
-    lines = []
-
-    lines.append(f"# AI Visibility Audit: {report.brand_name}")
-    lines.append(f"\n**Generated:** {report.created_at[:10]}  ")
-    lines.append(f"**Website:** {report.brand_website}  ")
-    lines.append(f"**Status:** Ready for human review\n")
-    lines.append("---\n")
-
-    lines.append("## Executive Summary\n")
-    score = v.visibility_score if v else 0
     if score == 0:
         verdict = "❌ Not detected in AI recommendations"
     elif score < 10:
-        verdict = "⚠️ Very low visibility — rarely recommended"
+        verdict = "⚠️  Very low visibility — rarely recommended"
     elif score < 30:
         verdict = "🔶 Low visibility — occasionally recommended"
     elif score < 60:
@@ -28,92 +19,122 @@ def generate_markdown_report(report: AuditReport) -> str:
     else:
         verdict = "✅ Good visibility — frequently recommended"
 
-    lines.append(f"**AI Visibility Verdict:** {verdict}\n")
-    lines.append(
-        f"{report.brand_name} appeared in **{v.mentions if v else 0}** out of "
-        f"**{v.samples if v else 0}** AI responses sampled across gut health queries. "
-        f"This translates to a visibility score of **{score}%**.\n"
-    )
-    lines.append("---\n")
+    bar = "█" * int(score / 5) + "░" * (20 - int(score / 5))
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-    lines.append("## Section 1 — Visibility Score\n")
-    if v:
-        bar_filled = int(score / 5)
-        bar = "█" * bar_filled + "░" * (20 - bar_filled)
-        lines.append(f"```\nVisibility Score: {score}%\n[{bar}]\nMentions: {v.mentions} / {v.samples} samples\n```\n")
-        lines.append(f"- **Score:** {score}%")
-        lines.append(f"- **Mentions:** {v.mentions}")
-        lines.append(f"- **Samples taken:** {v.samples}")
-        lines.append(f"- **Prompts tested:** 5 gut-health queries × 5 samples each\n")
-    else:
-        lines.append("_Visibility data unavailable._\n")
-    lines.append("---\n")
+    lines = [
+        f"# AI Visibility Audit: {report.brand_name}",
+        f"",
+        f"**Date:** {now}  ",
+        f"**Website:** {report.brand_website}  ",
+        f"**Verdict:** {verdict}",
+        f"",
+        f"---",
+        f"",
+        f"## Executive Summary",
+        f"",
+        f"{report.brand_name} appeared in **{v.mentions if v else 0}** of **{v.samples if v else 0}** AI responses "
+        f"sampled across {len(report.prompts_used)} gut health queries ({5} samples each).  ",
+        f"Visibility score: **{score}%**  ",
+        f"Top competitor by AI mentions: **{list(report.competitors.keys())[0] if report.competitors else 'N/A'}**",
+        f"",
+        f"---",
+        f"",
+        f"## 1. Visibility Score",
+        f"",
+        f"```",
+        f"Score: {score}%",
+        f"[{bar}]",
+        f"Mentions : {v.mentions if v else 0}",
+        f"Samples  : {v.samples if v else 0}",
+        f"Prompts  : {len(report.prompts_used)}",
+        f"```",
+        f"",
+        f"---",
+        f"",
+        f"## 2. Competitor Capture",
+        f"",
+    ]
 
-    lines.append("## Section 2 — Competitor Capture\n")
     if report.competitors:
-        lines.append("| Brand | AI Mentions |")
-        lines.append("|-------|------------|")
-        for brand, count in list(report.competitors.items())[:10]:
-            lines.append(f"| {brand} | {count} |")
+        lines += ["| Rank | Brand | AI Mentions |", "|------|-------|-------------|"]
+        for i, (brand, count) in enumerate(list(report.competitors.items())[:10], 1):
+            lines.append(f"| {i} | {brand} | {count} |")
+    else:
+        lines.append("_No competitors detected._")
+
+    lines += [
+        f"",
+        f"---",
+        f"",
+        f"## 3. Citation Surface",
+        f"",
+        f"- Brand domain citations: **{c.brand_domain_mentions if c else 0}**",
+        f"- Total citations in responses: **{c.total_citation_mentions if c else 0}**",
+        f"- Brand citation share: **{c.citation_share if c else 0}%**",
+        f"",
+    ]
+
+    if c and c.domain_counts:
+        lines += ["| Domain | Count |", "|--------|-------|"]
+        for domain, count in list(c.domain_counts.items())[:8]:
+            lines.append(f"| {domain} | {count} |")
         lines.append("")
-        top = list(report.competitors.keys())[0] if report.competitors else "N/A"
-        lines.append(f"**Top competitor detected:** {top}\n")
-    else:
-        lines.append("_No competitor data extracted._\n")
-    lines.append("---\n")
 
-    lines.append("## Section 3 — Citation Surface\n")
-    if c:
-        lines.append(f"- **Brand domain citations:** {c.brand_domain_mentions}")
-        lines.append(f"- **Total citations found:** {c.total_citation_mentions}")
-        lines.append(f"- **Brand citation share:** {c.citation_share}%\n")
-        if c.domain_counts:
-            lines.append("**Top cited domains:**\n")
-            lines.append("| Domain | Count |")
-            lines.append("|--------|-------|")
-            for domain, count in list(c.domain_counts.items())[:8]:
-                lines.append(f"| {domain} | {count} |")
-            lines.append("")
-        if g:
-            lines.append(f"**Grounding classification:**")
-            lines.append(f"- Static knowledge signals: {g.static_mentions}")
-            lines.append(f"- Web-sourced signals: {g.web_mentions}\n")
-    else:
-        lines.append("_Citation data unavailable._\n")
-    lines.append("---\n")
+    if g:
+        lines += [
+            f"**Grounding signals:**",
+            f"- Static knowledge: {g.static_mentions}",
+            f"- Web-sourced: {g.web_mentions}",
+            f"",
+        ]
 
-    lines.append("## Section 4 — Evidence Gaps\n")
+    lines += [
+        f"---",
+        f"",
+        f"## 4. Evidence Gaps",
+        f"",
+    ]
+
     if report.evidence_gaps:
+        conf_emoji = {"high": "🔴", "medium": "🟠", "low": "🟡"}
         for gap in report.evidence_gaps:
-            confidence_emoji = {"high": "🔴", "medium": "🟠", "low": "🟡"}.get(gap.confidence, "⚪")
-            lines.append(f"### {confidence_emoji} {gap.gap_type.replace('_', ' ').title()}")
-            lines.append(f"**Confidence:** {gap.confidence.upper()}\n")
+            emoji = conf_emoji.get(gap.confidence, "⚪")
+            lines.append(f"### {emoji} {gap.gap_type.replace('_', ' ').title()} ({gap.confidence.upper()} confidence)")
+            lines.append("")
             for e in gap.evidence:
                 lines.append(f"- {e}")
             lines.append("")
     else:
         lines.append("_No evidence gaps identified._\n")
-    lines.append("---\n")
 
-    lines.append("## Section 5 — Quick Wins\n")
-    lines.append("_Prioritized by estimated impact. Human review required before acting._\n")
-    if report.quick_wins:
-        for i, win in enumerate(report.quick_wins[:10], 1):
-            lines.append(f"{i}. {win}")
-        lines.append("")
-    else:
-        lines.append("_No recommendations generated._\n")
-    lines.append("---\n")
+    lines += [
+        f"---",
+        f"",
+        f"## 5. Quick Wins",
+        f"",
+        f"_Prioritized by estimated impact. Human review required before acting._",
+        f"",
+    ]
 
-    lines.append("## ⚠️ Human Review Checklist\n")
-    lines.append("Before sending this report to a client, verify:\n")
-    lines.append("- [ ] Visibility score matches expectations for the brand")
-    lines.append("- [ ] Competitor names are correctly identified (not false positives)")
-    lines.append("- [ ] Evidence gaps are grounded in the data, not invented")
-    lines.append("- [ ] Quick wins are relevant to this specific brand")
-    lines.append("- [ ] No claims made about \"root cause\" or \"guaranteed\" outcomes")
-    lines.append("- [ ] Report tone is professional and founder-friendly\n")
-    lines.append("---\n")
-    lines.append(f"*AI Symptom Acquisition Audit™ — Generated {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}*")
+    for i, win in enumerate(report.quick_wins[:10], 1):
+        lines.append(f"{i}. {win}")
+
+    lines += [
+        f"",
+        f"---",
+        f"",
+        f"## Human Review Checklist",
+        f"",
+        f"- [ ] Visibility score is plausible for this brand",
+        f"- [ ] Competitor names are real (no hallucinations)",
+        f"- [ ] Evidence gaps are data-backed, not invented",
+        f"- [ ] Quick wins apply to this specific brand",
+        f"- [ ] No forbidden language: root cause / guaranteed / definitive",
+        f"",
+        f"---",
+        f"",
+        f"_AI Visibility Audit™ — {now}_",
+    ]
 
     return "\n".join(lines)
