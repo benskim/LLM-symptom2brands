@@ -23,9 +23,9 @@ def analyze_evidence_gaps(
     brand_name: str,
     brand_website: str,
     visibility: VisibilityResult,
-    citations: CitationResult,
+    citations: "CitationResult | None",
     competitors: dict[str, int],
-    grounding: GroundingResult,
+    grounding: "GroundingResult | None",
 ) -> tuple[list[EvidenceGap], list[str]]:
 
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -33,6 +33,13 @@ def analyze_evidence_gaps(
         "gemini-1.5-flash",
         generation_config=genai.GenerationConfig(temperature=0),
     )
+
+    c_brand   = citations.brand_domain_mentions if citations else 0
+    c_total   = citations.total_citation_mentions if citations else 0
+    c_share   = citations.citation_share if citations else 0.0
+    c_domains = citations.top_domains[:5] if citations else []
+    g_static  = grounding.static_mentions if grounding else 0
+    g_web     = grounding.web_mentions if grounding else 0
 
     prompt = f"""You are an AI visibility analyst. Analyze this data and identify evidence gaps.
 
@@ -47,14 +54,14 @@ TOP COMPETITORS (brand: mention_count):
 {json.dumps(dict(list(competitors.items())[:5]), indent=2)}
 
 CITATION DATA:
-- Brand domain citations: {citations.brand_domain_mentions}
-- Total citations found: {citations.total_citation_mentions}
-- Citation share: {citations.citation_share}%
-- Top cited domains: {citations.top_domains[:5]}
+- Brand domain citations: {c_brand}
+- Total citations found: {c_total}
+- Citation share: {c_share}%
+- Top cited domains: {c_domains}
 
 GROUNDING:
-- Static knowledge mentions: {grounding.static_mentions}
-- Web-sourced mentions: {grounding.web_mentions}
+- Static knowledge mentions: {g_static}
+- Web-sourced mentions: {g_web}
 
 RULES:
 - Never invent facts not in the data above.

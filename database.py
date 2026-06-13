@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 
-DB_PATH = "data/audits.db"
+DB_PATH = "audit.db"
 
 
 def init_db():
@@ -30,7 +30,8 @@ def save_audit(brand_name: str, brand_website: str, report_json: dict, markdown:
     c = conn.cursor()
     now = datetime.utcnow().isoformat()
     c.execute(
-        "INSERT INTO audits (brand_name, brand_website, status, report_json, markdown_report, created_at) VALUES (?, ?, 'complete', ?, ?, ?)",
+        "INSERT INTO audits (brand_name, brand_website, status, report_json, markdown_report, created_at) "
+        "VALUES (?, ?, 'complete', ?, ?, ?)",
         (brand_name, brand_website, json.dumps(report_json), markdown, now)
     )
     audit_id = c.lastrowid
@@ -39,7 +40,7 @@ def save_audit(brand_name: str, brand_website: str, report_json: dict, markdown:
     return audit_id
 
 
-def list_audits():
+def list_audits() -> list[dict]:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
