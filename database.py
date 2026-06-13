@@ -40,6 +40,21 @@ def save_audit(brand_name: str, brand_website: str, report_json: dict, markdown:
     return audit_id
 
 
+def get_audit(audit_id: int) -> dict | None:
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("SELECT * FROM audits WHERE id=?", (audit_id,))
+    row = c.fetchone()
+    conn.close()
+    if row:
+        d = dict(row)
+        if d.get("report_json"):
+            d["report_json"] = json.loads(d["report_json"])
+        return d
+    return None
+
+
 def list_audits() -> list[dict]:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row

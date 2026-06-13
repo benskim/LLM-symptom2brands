@@ -23,7 +23,7 @@ from modules.citations import extract_citations
 from modules.grounding import classify_grounding
 from modules.evidence_gap import analyze_evidence_gaps
 from modules.report import generate_markdown
-from database import init_db, save_audit, list_audits
+from database import init_db, save_audit, list_audits, get_audit
 
 
 def load_prompts(path: str) -> list[str]:
@@ -89,6 +89,37 @@ def cmd_list():
         )
 
     print()
+
+
+# ── --read command ───────────────────────────────────────────────────────────
+
+def cmd_read(audit_id: int):
+    init_db()
+    audit = get_audit(audit_id)
+    if not audit:
+        print(f"\n  [ERROR] No audit found with ID {audit_id}.")
+        print("  Run  python main.py --list  to see all available IDs.\n")
+        sys.exit(1)
+
+    md = audit.get("markdown_report", "").strip()
+
+    # Try the .md file first (prettier), fall back to DB content
+    report_file = f"reports/{slug(audit['brand_name'])}_audit.md"
+    if os.path.exists(report_file):
+        with open(report_file, encoding="utf-8") as f:
+            md = f.read().strip()
+
+    if not md:
+        print(f"\n  [ERROR] Report #{audit_id} exists in the database but has no content.\n")
+        sys.exit(1)
+
+    # Print header
+    print(f"\n{'='*60}")
+    print(f"  Report #{audit_id} — {audit['brand_name']}")
+    print(f"  {audit['brand_website']}  |  {(audit['created_at'] or '')[:19]} UTC")
+    print(f"{'='*60}\n")
+    print(md)
+    print(f"\n{'='*60}\n")
 
 
 # ── run audit ────────────────────────────────────────────────────────────────
@@ -234,15 +265,19 @@ def parse_args():
     parser.add_argument("--brand",   help='Brand name, e.g. "Begin Health"')
     parser.add_argument("--url",     help="Brand website, e.g. https://beginhealth.com")
     parser.add_argument("--prompts", default="prompts.json", help="Prompts JSON file (default: prompts.json)")
-    parser.add_argument("--list",    action="store_true",   help="List all past audits")
+    parser.add_argument("--list",    action="store_true", help="List all past audits")
+    parser.add_argument("--read",    type=int, metavar="ID", help="Print a past report by ID (see --list for IDs)")
 
     args = parser.parse_args()
 
     if args.list:
         return "list", None, None, None
 
+    if args.read is not None:
+        return "read", args.read, None, None
+
     if not args.brand or not args.url:
-        parser.error("--brand and --url are required (or use --list to view past audits)")
+        parser.error("--brand and --url are required  |  --list to view history  |  --read ID to read a report")
 
     return "run", args.brand, args.url, args.prompts
 
@@ -251,5 +286,7 @@ if __name__ == "__main__":
     cmd, brand, url, prompts_path = parse_args()
     if cmd == "list":
         cmd_list()
+    elif cmd == "read":
+        cmd_read(brand)   # brand holds the ID when cmd == "read"
     else:
         run_audit(brand, url, prompts_path)
