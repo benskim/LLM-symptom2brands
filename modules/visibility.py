@@ -4,6 +4,7 @@ import google.generativeai as genai
 from models import VisibilityResult
 
 SAMPLES_PER_PROMPT = 5
+CALL_DELAY = 2.5   # 24 RPM — safely under the 30 RPM free-tier limit
 
 
 def _call_with_retry(model, prompt: str, max_retries: int = 3) -> str:
@@ -13,16 +14,22 @@ def _call_with_retry(model, prompt: str, max_retries: int = 3) -> str:
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
-            if attempt < max_retries - 1:
+            msg = str(e)
+            if "429" in msg or "ResourceExhausted" in type(e).__name__:
+                wait = 60
+                print(f"    ⏳ Rate limit hit — waiting {wait}s before retry {attempt+1}/{max_retries}…")
+                time.sleep(wait)
+            elif attempt < max_retries - 1:
                 time.sleep(delays[attempt])
             else:
-                return f"FAILED: {str(e)}"
+                return f"FAILED: {msg}"
     return "FAILED"
 
 
 def run_visibility_sampling(brand_name: str, prompts: list[str]) -> VisibilityResult:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    # Use flash-lite for bulk sampling: 30 RPM / 1500 RPD free tier
+    model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
     raw_responses = []
     mentions = 0
@@ -36,7 +43,7 @@ def run_visibility_sampling(brand_name: str, prompts: list[str]) -> VisibilityRe
             total_samples += 1
             if brand_name.lower() in text.lower():
                 mentions += 1
-            time.sleep(0.5)
+            time.sleep(CALL_DELAY)
 
     score = round((mentions / total_samples) * 100, 1) if total_samples > 0 else 0.0
 

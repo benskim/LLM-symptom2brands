@@ -29,6 +29,9 @@ STOP_WORDS = {
 
 
 def aggregate_competitors(visibility: VisibilityResult, brand_name: str) -> dict[str, int]:
+    # Drop failed API responses before processing
+    clean_responses = [r for r in visibility.raw_responses if not r.startswith("FAILED:")]
+    visibility = visibility.model_copy(update={"raw_responses": clean_responses})
     all_text = " ".join(visibility.raw_responses)
     counts = Counter()
 

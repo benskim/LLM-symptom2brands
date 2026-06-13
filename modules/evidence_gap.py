@@ -12,7 +12,12 @@ def _call_with_retry(model, prompt: str, max_retries: int = 3) -> str:
         try:
             return model.generate_content(prompt).text
         except Exception as e:
-            if attempt < max_retries - 1:
+            msg = str(e)
+            if "429" in msg or "ResourceExhausted" in type(e).__name__:
+                wait = 60
+                print(f"    ⏳ Rate limit — waiting {wait}s before retry {attempt+1}/{max_retries}…")
+                time.sleep(wait)
+            elif attempt < max_retries - 1:
                 time.sleep(delays[attempt])
             else:
                 return ""
@@ -30,7 +35,7 @@ def analyze_evidence_gaps(
 
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
     model = genai.GenerativeModel(
-        "gemini-1.5-flash",
+        "gemini-2.0-flash",
         generation_config=genai.GenerationConfig(temperature=0),
     )
 
