@@ -1,0 +1,369 @@
+# AI Symptom Acquisition Audit
+
+## Revenue-First Build Specification v2
+
+### PRIMARY OBJECTIVE
+
+This project does NOT exist to build software.
+
+This project exists to close the first 3 customers.
+
+All engineering decisions must be evaluated against one question:
+
+"Will this help generate a paid audit within the next 30 days?"
+
+If not, do not build it.
+
+---
+
+# BUSINESS CONTEXT
+
+Operator:
+
+* Solo founder
+* Korea based
+* No sales team
+* No designer
+* No DevOps
+
+Target Market:
+
+* US Shopify Gut Health Brands
+* Probiotic Brands
+* Digestive Health DTC
+
+Customer Size:
+
+* 5–20 employees
+* Founder-led growth
+* Shopify storefront
+* Subscription products preferred
+
+Target Outcome:
+
+* First customer within 30 days
+* First $300 revenue within 100 days
+
+---
+
+# PRODUCT DEFINITION
+
+Customer does not buy software.
+
+Customer buys:
+
+"Why is ChatGPT recommending competitors instead of us?"
+
+The deliverable is a report.
+
+The software exists only to generate the report faster.
+
+---
+
+# REQUIRED OUTPUT
+
+For every brand audit generate:
+
+## Section 1
+
+Visibility Score
+
+Questions:
+
+* Is the brand recommended?
+* How often?
+
+Output:
+
+* mention count
+* visibility score
+
+---
+
+## Section 2
+
+Competitor Capture
+
+Questions:
+
+* Which brands appear instead?
+
+Output:
+
+* ranked competitor list
+* frequency
+
+---
+
+## Section 3
+
+Citation Surface
+
+Questions:
+
+* Which websites are AI models citing?
+
+Output:
+
+* top domains
+* citation counts
+
+---
+
+## Section 4
+
+Evidence Gap
+
+Questions:
+
+* What signals appear missing?
+
+Output:
+
+* evidence-backed observations only
+
+Allowed language:
+
+"Possible gap"
+
+Forbidden language:
+
+"Root cause"
+
+"Definitive reason"
+
+"Guaranteed explanation"
+
+---
+
+## Section 5
+
+Quick Wins
+
+Generate:
+
+* FAQ ideas
+* symptom pages
+* trust signals
+* citation acquisition opportunities
+
+Maximum:
+
+10 recommendations
+
+Prioritize highest leverage actions.
+
+---
+
+# MVP ARCHITECTURE
+
+Build only four modules.
+
+Module A
+
+Visibility Sampling
+
+Requirements:
+
+* OpenAI only
+* 5 samples per prompt
+* sequential execution
+* retry 3 times
+
+No async.
+
+No queue.
+
+No orchestration framework.
+
+---
+
+Module B
+
+Citation Extraction
+
+Priority order:
+
+1. structured citations
+2. fallback regex
+
+Do not build complex parsers.
+
+---
+
+Module C
+
+Competitor Aggregation
+
+Extract:
+
+* brand names
+* mention counts
+
+Simple frequency table.
+
+No entity resolution engine.
+
+No knowledge graph.
+
+---
+
+Module D
+
+Evidence Gap Generator
+
+Single model call.
+
+Temperature:
+
+0
+
+Input:
+
+* visibility data
+* citation data
+* competitor data
+
+Output:
+
+structured JSON
+
+No autonomous agents.
+
+No multi-step reasoning chains.
+
+No LangGraph.
+
+No CrewAI.
+
+No LangChain agents.
+
+---
+
+# NON-GOALS
+
+Explicitly reject:
+
+* vector databases
+* embeddings
+* RAG
+* Redis
+* Kafka
+* Celery
+* RabbitMQ
+* AWS architecture
+* GCP architecture
+* Kubernetes
+* Docker orchestration
+* multi-provider routing
+* Gemini integration
+* shopping feed analysis
+* merchant center analysis
+* browser automation
+
+If implementation requires these systems:
+
+Stop.
+
+Use a simpler approach.
+
+---
+
+# DATA STORAGE
+
+Allowed:
+
+SQLite
+
+JSON
+
+CSV
+
+Nothing else.
+
+---
+
+# REPORT DELIVERY
+
+Output format:
+
+Markdown
+
+Notion
+
+PDF
+
+Human review is expected.
+
+Human review is required.
+
+Do not optimize away human review.
+
+---
+
+# ENGINEERING PRIORITY RULE
+
+Priority 1
+
+Generate report.
+
+Priority 2
+
+Reduce report generation time.
+
+Priority 3
+
+Improve report quality.
+
+Priority 4
+
+Everything else.
+
+---
+
+# SUCCESS CONDITION
+
+The project is complete when:
+
+Input:
+
+brand website
+
+Output:
+
+founder-ready audit report
+
+Time:
+
+under 10 minutes
+
+Human review:
+
+under 10 minutes
+
+Total delivery:
+
+under 20 minutes
+
+No additional infrastructure required.
+
+---
+
+# FAILURE CONDITION
+
+The project is considered failed if:
+
+* perfect architecture exists
+* no report has been sold
+
+OR
+
+* automation exists
+* no founder replied
+
+OR
+
+* infrastructure exists
+* no customer paid
+
+Revenue takes precedence over architecture.
