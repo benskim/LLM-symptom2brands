@@ -1,0 +1,51 @@
+{
+  "brand_name": "Begin Health",
+  "brand_website": "https://beginhealth.com",
+  "prompts_used": [
+    "best probiotic for bloating",
+    "supplements for constipation relief",
+    "digestive support products for kids",
+    "gut health products for families",
+    "best probiotics for IBS"
+  ],
+  "created_at": "2026-06-13T10:08:30.121219",
+  "visibility": {
+    "brand_name": "Begin Health",
+    "visibility_score": 0.0,
+    "mentions": 0,
+    "samples": 25
+  },
+  "competitors": {
+    "Quota": 75,
+    "FreeTier": 75,
+    "FAILED": 25,
+    "Please": 25,
+    "Learn": 25,
+    "Gemini": 25,
+    "GenerateRequestsPerDayPerProjectPerModel": 25,
+    "GenerateRequestsPerMinutePerProjectPerModel": 25,
+    "GenerateContentInputTokensPerModelPerMinute": 25
+  },
+  "citations": {
+    "top_domains": [
+      "googleapis.com",
+      "ai.google",
+      "ai.dev"
+    ],
+    "domain_counts": {
+      "googleapis.com": 150,
+      "ai.google": 50,
+      "ai.dev": 25
+    },
+    "citation_share": 0.0,
+    "brand_domain_mentions": 0,
+    "total_citation_mentions": 225
+  },
+  "grounding": {
+    "static_mentions": 0,
+    "web_mentions": 225
+  },
+  "evidence_gaps": [],
+  "quick_wins": [],
+  "status": "complete"
+}

@@ -91,6 +91,41 @@ def cmd_list():
     print()
 
 
+# ── --export command ─────────────────────────────────────────────────────────
+
+def cmd_export(audit_id: int):
+    init_db()
+    audit = get_audit(audit_id)
+    if not audit:
+        print(f"\n  [ERROR] No audit found with ID {audit_id}.")
+        print("  Run  python main.py --list  to see all available IDs.\n")
+        sys.exit(1)
+
+    md = audit.get("markdown_report", "").strip()
+    if not md:
+        print(f"\n  [ERROR] Report #{audit_id} has no markdown content in the database.\n")
+        sys.exit(1)
+
+    os.makedirs("reports", exist_ok=True)
+    base      = slug(audit["brand_name"])
+    md_path   = f"reports/{base}_audit_{audit_id}.md"
+    json_path = f"reports/{base}_audit_{audit_id}.json"
+
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write(md)
+
+    rj = audit.get("report_json")
+    if rj:
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(rj, f, indent=2, default=str)
+
+    print(f"\n  ✅ Exported report #{audit_id} — {audit['brand_name']}")
+    print(f"  Markdown : {md_path}")
+    if rj:
+        print(f"  JSON     : {json_path}")
+    print()
+
+
 # ── --read command ───────────────────────────────────────────────────────────
 
 def cmd_read(audit_id: int):
@@ -266,7 +301,8 @@ def parse_args():
     parser.add_argument("--url",     help="Brand website, e.g. https://beginhealth.com")
     parser.add_argument("--prompts", default="prompts.json", help="Prompts JSON file (default: prompts.json)")
     parser.add_argument("--list",    action="store_true", help="List all past audits")
-    parser.add_argument("--read",    type=int, metavar="ID", help="Print a past report by ID (see --list for IDs)")
+    parser.add_argument("--read",    type=int, metavar="ID", help="Print a past report by ID")
+    parser.add_argument("--export",  type=int, metavar="ID", help="Re-export a past report from DB to reports/ folder")
 
     args = parser.parse_args()
 
@@ -275,6 +311,9 @@ def parse_args():
 
     if args.read is not None:
         return "read", args.read, None, None
+
+    if args.export is not None:
+        return "export", args.export, None, None
 
     if not args.brand or not args.url:
         parser.error("--brand and --url are required  |  --list to view history  |  --read ID to read a report")
@@ -287,6 +326,8 @@ if __name__ == "__main__":
     if cmd == "list":
         cmd_list()
     elif cmd == "read":
-        cmd_read(brand)   # brand holds the ID when cmd == "read"
+        cmd_read(brand)
+    elif cmd == "export":
+        cmd_export(brand)
     else:
         run_audit(brand, url, prompts_path)
