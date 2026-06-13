@@ -1,0 +1,441 @@
+# AI Symptom Acquisition Audit™
+
+## Revenue-First MVP Build Spec v3 (Gemini Edition)
+
+### SYSTEM ROLE
+
+You are a senior software engineer.
+
+Your job is NOT to build a perfect GEO platform.
+
+Your job is to build the smallest possible system that can generate a sellable audit report for a Shopify gut health brand.
+
+The founder is a solo developer.
+
+The founder needs paying customers, not infrastructure.
+
+---
+
+# PRIMARY BUSINESS GOAL
+
+Generate founder-facing AI Visibility Audit reports.
+
+Target:
+
+* First usable report within 7 days
+* First outreach campaign within 14 days
+* First paid customer within 100 days
+
+Success metric:
+
+A founder receives a report and understands:
+
+1. Why competitors are recommended
+2. Why their brand is missing
+3. What actions they should take
+
+---
+
+# TARGET CUSTOMER
+
+Characteristics:
+
+* Shopify store
+* Gut health
+* Probiotics
+* Digestive health
+* Founder-led company
+* 5–20 employees
+
+Example companies:
+
+* Begin Health
+* Bioma
+* BelliWelli
+* Seed
+* Pendulum
+
+---
+
+# MVP DEFINITION
+
+The product is NOT software.
+
+The product is a report.
+
+Software only exists to generate the report faster.
+
+---
+
+# TECHNICAL CONSTRAINTS
+
+Use:
+
+* Python
+* Gemini API
+* SQLite
+* JSON
+* Markdown
+
+Avoid:
+
+* OpenAI API
+* LangChain
+* LangGraph
+* CrewAI
+* AutoGen
+* Vector databases
+* Redis
+* Kafka
+* RabbitMQ
+* Celery
+* Kubernetes
+* Docker orchestration
+* AWS
+* GCP infrastructure
+* Vertex AI
+* Multi-agent systems
+* Async architectures
+
+If a feature requires any of the above:
+
+Do not build it.
+
+Use a simpler solution.
+
+---
+
+# MODULE A
+
+Visibility Sampling Engine
+
+Purpose:
+
+Measure recommendation frequency.
+
+Input:
+
+Brand name
+
+Prompt set
+
+Example prompts:
+
+* best probiotic for bloating
+* supplements for constipation
+* digestive support for kids
+* gut health products for families
+* best probiotics for IBS
+
+Process:
+
+For each prompt:
+
+1. Create fresh Gemini request
+2. No memory
+3. No conversation history
+4. Run 5 samples
+5. Store raw responses
+
+Execution:
+
+Sequential only.
+
+No async.
+
+Output:
+
+{
+"visibility_score": 20.0,
+"mentions": 5,
+"samples": 25
+}
+
+Formula:
+
+mentions / samples * 100
+
+---
+
+# MODULE B
+
+Competitor Aggregation Engine
+
+Purpose:
+
+Identify which brands appear most frequently.
+
+Process:
+
+Extract brand names from all responses.
+
+Generate frequency table.
+
+Output:
+
+{
+"Seed": 12,
+"Bioma": 9,
+"Pendulum": 5,
+"Begin Health": 2
+}
+
+Do not build:
+
+* knowledge graphs
+* entity resolution systems
+* embeddings
+
+Simple frequency counting only.
+
+---
+
+# MODULE C
+
+Citation Surface Engine
+
+Purpose:
+
+Identify which sources Gemini references.
+
+Extract:
+
+* URLs
+* domains
+* cited publications
+
+Output:
+
+{
+"top_domains": [
+"healthline.com",
+"reddit.com",
+"webmd.com"
+]
+}
+
+Calculate:
+
+citation_share
+
+Formula:
+
+brand_domain_mentions /
+total_citation_mentions
+
+Fallback:
+
+If structured citations unavailable:
+
+Extract URLs via regex.
+
+---
+
+# MODULE D
+
+Grounding Classification
+
+Supported:
+
+STATIC
+WEB
+
+Only these two.
+
+Do not implement:
+
+* shopping feeds
+* merchant center
+* ecommerce feed diagnostics
+
+Output:
+
+{
+"static_mentions": 8,
+"web_mentions": 17
+}
+
+---
+
+# MODULE E
+
+Evidence Gap Analyzer
+
+This is the most important module.
+
+Input:
+
+* visibility score
+* competitors
+* citation data
+* grounding data
+
+Model:
+
+Gemini
+
+Temperature:
+
+0
+
+Rules:
+
+Never invent facts.
+
+Allowed:
+
+"Possible gap"
+
+"Likely gap"
+
+"Observed difference"
+
+Forbidden:
+
+"Root cause"
+
+"Guaranteed explanation"
+
+"Definitive reason"
+
+Output:
+
+{
+"gap_type": "authority_signals",
+"confidence": "medium",
+"evidence": [
+"Healthline cited 8 times",
+"Brand cited 0 times"
+]
+}
+
+---
+
+# REPORT GENERATION
+
+Generate markdown report.
+
+Required sections:
+
+1. Executive Summary
+2. Visibility Score
+3. Competitor Capture
+4. Citation Surface
+5. Evidence Gaps
+6. Quick Wins
+
+Maximum:
+
+10 recommendations
+
+Prioritize highest-impact actions.
+
+---
+
+# DATA MODELS
+
+Use Pydantic.
+
+Required schemas:
+
+VisibilityResult
+
+CitationResult
+
+EvidenceGap
+
+AuditReport
+
+Strict typing required.
+
+---
+
+# STORAGE
+
+Use:
+
+SQLite
+
+JSON export
+
+Nothing else.
+
+---
+
+# ERROR HANDLING
+
+Retry:
+
+3 attempts
+
+Backoff:
+
+1 second
+2 seconds
+4 seconds
+
+If failure persists:
+
+Store:
+
+{
+"status": "FAILED"
+}
+
+Continue pipeline.
+
+Never crash full execution.
+
+---
+
+# HUMAN REVIEW RULE
+
+The system is not autonomous.
+
+Every report is reviewed by a human before delivery.
+
+Optimize for:
+
+* report quality
+* founder readability
+
+Not for:
+
+* autonomous operation
+
+---
+
+# DEFINITION OF DONE
+
+Input:
+
+Brand name
+Brand website
+
+Output:
+
+Markdown audit report
+
+Contents:
+
+* visibility score
+* competitor rankings
+* citation analysis
+* evidence gaps
+* quick-win recommendations
+
+Generation time:
+
+under 10 minutes
+
+Human review:
+
+under 10 minutes
+
+Total workflow:
+
+under 20 minutes
+
+If this condition is met, stop building features.
+
+Begin customer outreach.

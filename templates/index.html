@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Visibility Audit — Gut Health Brands</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0f14;
+      --surface: #161820;
+      --border: #2a2d3a;
+      --accent: #6ee7b7;
+      --accent2: #818cf8;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --danger: #f87171;
+      --warn: #fbbf24;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    header .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+
+    header .tagline {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.8rem; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.4rem;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+    }
+
+    .field input::placeholder {
+      color: var(--muted);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #059669, #4f46e5);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.99); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .progress-box {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .progress-box.active { display: block; }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .progress-steps {
+      list-style: none;
+      text-align: left;
+      max-width: 360px;
+      margin: 1.5rem auto 0;
+    }
+
+    .progress-steps li {
+      padding: 0.35rem 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .progress-steps li.done { color: var(--accent); }
+    .progress-steps li.active { color: var(--text); }
+
+    .step-icon { font-size: 0.9rem; }
+
+    .error-box {
+      display: none;
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      color: var(--danger);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .error-box.active { display: block; }
+
+    .audits-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .audits-table th {
+      text-align: left;
+      padding: 0.6rem 0.8rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .audits-table td {
+      padding: 0.75rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .audits-table tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-running { background: rgba(251,191,36,0.15); color: var(--warn); }
+    .badge-complete { background: rgba(110,231,183,0.12); color: var(--accent); }
+    .badge-failed { background: rgba(248,113,113,0.12); color: var(--danger); }
+    .badge-pending { background: rgba(100,116,139,0.15); color: var(--muted); }
+
+    .link-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.7rem;
+      color: var(--accent2);
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+
+    .link-btn:hover { border-color: var(--accent2); }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .section-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .mini-stat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .mini-stat .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .mini-stat .label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo">🧬 AI Visibility Audit™</span>
+  <span class="tagline">Gut Health Brand Intelligence</span>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <h1>Why is ChatGPT recommending<br>your competitors instead of you?</h1>
+    <p>Enter any Shopify gut health brand to get an AI visibility audit — see who's winning, why, and what to fix.</p>
+  </div>
+
+  <div class="card">
+    <h2>🚀 Start New Audit</h2>
+    <div class="error-box" id="errorBox"></div>
+    <div class="form-row">
+      <div class="field">
+        <label>Brand Name</label>
+        <input type="text" id="brandName" placeholder="e.g. Seed, Bioma, BelliWelli" />
+      </div>
+      <div class="field">
+        <label>Brand Website</label>
+        <input type="text" id="brandWebsite" placeholder="e.g. seed.com" />
+      </div>
+    </div>
+    <button class="btn-primary" id="startBtn" onclick="startAudit()">
+      Generate AI Visibility Audit →
+    </button>
+  </div>
+
+  <div class="progress-box" id="progressBox">
+    <div class="spinner"></div>
+    <p style="font-weight:600; margin-bottom:0.3rem;">Running audit pipeline…</p>
+    <p style="color:var(--muted); font-size:0.85rem;">This takes 3–8 minutes. You can safely leave this tab open.</p>
+    <ul class="progress-steps" id="progressSteps">
+      <li id="step1"><span class="step-icon">⏳</span> Module A — Visibility Sampling (25 AI queries)</li>
+      <li id="step2"><span class="step-icon">⏳</span> Module B — Competitor Aggregation</li>
+      <li id="step3"><span class="step-icon">⏳</span> Module C — Citation Surface Analysis</li>
+      <li id="step4"><span class="step-icon">⏳</span> Module D — Grounding Classification</li>
+      <li id="step5"><span class="step-icon">⏳</span> Module E — Evidence Gap Analysis</li>
+      <li id="step6"><span class="step-icon">⏳</span> Generating Markdown Report</li>
+    </ul>
+  </div>
+
+  <div class="card" id="historyCard">
+    <h2>📋 Previous Audits</h2>
+    <div id="auditsList"><div class="empty-state">No audits yet. Run your first one above.</div></div>
+  </div>
+</div>
+
+<script>
+  let currentAuditId = null;
+  let pollInterval = null;
+  let stepTimer = 0;
+
+  async function startAudit() {
+    const brandName = document.getElementById('brandName').value.trim();
+    const brandWebsite = document.getElementById('brandWebsite').value.trim();
+    const errorBox = document.getElementById('errorBox');
+    const btn = document.getElementById('startBtn');
+
+    errorBox.classList.remove('active');
+
+    if (!brandName || !brandWebsite) {
+      showError('Please enter both brand name and website.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Starting…';
+
+    try {
+      const res = await fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brand_name: brandName, brand_website: brandWebsite })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError(data.error || 'Failed to start audit.');
+        btn.disabled = false;
+        btn.textContent = 'Generate AI Visibility Audit →';
+        return;
+      }
+
+      currentAuditId = data.audit_id;
+      document.getElementById('progressBox').classList.add('active');
+      startStepAnimation();
+      pollInterval = setInterval(() => pollAudit(currentAuditId), 4000);
+
+    } catch (e) {
+      showError('Network error. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Generate AI Visibility Audit →';
+    }
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.classList.add('active');
+  }
+
+  function startStepAnimation() {
+    const steps = ['step1','step2','step3','step4','step5','step6'];
+    let current = 0;
+    stepTimer = setInterval(() => {
+      if (current > 0) {
+        const prev = document.getElementById(steps[current-1]);
+        prev.classList.remove('active');
+        prev.classList.add('done');
+        prev.querySelector('.step-icon').textContent = '✅';
+      }
+      if (current < steps.length) {
+        const el = document.getElementById(steps[current]);
+        el.classList.add('active');
+        el.querySelector('.step-icon').textContent = '⚙️';
+        current++;
+      } else {
+        clearInterval(stepTimer);
+      }
+    }, 45000 / steps.length);
+  }
+
+  async function pollAudit(id) {
+    try {
+      const res = await fetch(`/api/audit/${id}`);
+      const data = await res.json();
+
+      if (data.status === 'complete') {
+        clearInterval(pollInterval);
+        clearInterval(stepTimer);
+        markAllDone();
+        setTimeout(() => {
+          window.location.href = `/audit/${id}`;
+        }, 800);
+      } else if (data.status === 'failed') {
+        clearInterval(pollInterval);
+        clearInterval(stepTimer);
+        document.getElementById('progressBox').classList.remove('active');
+        showError('Audit failed. Check your API key and try again.');
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('startBtn').textContent = 'Generate AI Visibility Audit →';
+      }
+    } catch (e) {}
+  }
+
+  function markAllDone() {
+    ['step1','step2','step3','step4','step5','step6'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('active');
+      el.classList.add('done');
+      el.querySelector('.step-icon').textContent = '✅';
+    });
+  }
+
+  async function loadAudits() {
+    try {
+      const res = await fetch('/api/audits');
+      const audits = await res.json();
+      const container = document.getElementById('auditsList');
+
+      if (!audits.length) {
+        container.innerHTML = '<div class="empty-state">No audits yet. Run your first one above.</div>';
+        return;
+      }
+
+      const rows = audits.map(a => `
+        <tr>
+          <td><strong>${escHtml(a.brand_name)}</strong></td>
+          <td style="color:var(--muted)">${escHtml(a.brand_website)}</td>
+          <td><span class="badge badge-${a.status}">${a.status}</span></td>
+          <td style="color:var(--muted); font-size:0.8rem">${a.created_at ? a.created_at.slice(0,10) : ''}</td>
+          <td>
+            ${a.status === 'complete'
+              ? `<a href="/audit/${a.id}" class="link-btn">View Report →</a>`
+              : a.status === 'running'
+              ? `<span style="color:var(--warn); font-size:0.8rem">In progress…</span>`
+              : `<span style="color:var(--danger); font-size:0.8rem">Failed</span>`
+            }
+          </td>
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        <table class="audits-table">
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Website</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    } catch (e) {}
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  loadAudits();
+  setInterval(loadAudits, 10000);
+
+  document.getElementById('brandWebsite').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startAudit();
+  });
+</script>
+</body>
+</html>
